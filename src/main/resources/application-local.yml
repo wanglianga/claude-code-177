@@ -1,0 +1,35 @@
+# 本地快速体验 profile（无需 Docker/PostgreSQL/Kafka）：
+# java -jar target/water-filter-service.jar --spring.profiles.active=local
+# Kafka 不可用时事件仍可靠写入 outbox，业务逻辑不受影响。
+spring:
+  datasource:
+    url: jdbc:h2:mem:water;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+
+app:
+  defaults:
+    life-threshold-percent: 20
+    tds-limit: 100
+    chlorine-limit: 2.0
+    price-per-liter: 0.30
+    arrival-sla-hours: 24
+    complaint-window-hours: 24
+    complaint-cluster-size: 3
+    flush-min-minutes: 10
+  outbox:
+    fixed-delay-ms: 3600000
+  scheduler:
+    late-scan-ms: 3600000
+    reconcile-ms: 5000
+  kafka:
+    telemetry-listener-autostart: false

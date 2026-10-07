@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:water;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  kafka:
+    listener:
+      auto-startup: false
+    producer:
+      acks: 0
+
+app:
+  defaults:
+    life-threshold-percent: 20
+    tds-limit: 100
+    chlorine-limit: 2.0
+    price-per-liter: 0.30
+    arrival-sla-hours: 24
+    complaint-window-hours: 24
+    complaint-cluster-size: 3
+    flush-min-minutes: 10
+  outbox:
+    fixed-delay-ms: 86400000
+  scheduler:
+    late-scan-ms: 86400000
+    reconcile-ms: 86400000
+  kafka:
+    telemetry-listener-autostart: false

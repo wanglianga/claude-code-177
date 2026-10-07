@@ -1,0 +1,67 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: water-filter-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/water}
+    username: ${SPRING_DATASOURCE_USERNAME:water}
+    password: ${SPRING_DATASOURCE_PASSWORD:water}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  sql:
+    init:
+      mode: always
+      defer-datasource-initialization: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+    consumer:
+      group-id: water-filter-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: record
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  defaults:
+    # 滤芯寿命预警阈值（%），运营可按设备动态调整
+    life-threshold-percent: 20
+    # 水质 TDS 上限（mg/L）
+    tds-limit: 100
+    # 余氯上限（mg/L）
+    chlorine-limit: 2.0
+    # 每升水价（元）
+    price-per-liter: 0.30
+    # 派单后要求到场小时数
+    arrival-sla-hours: 24
+    # 投诉聚集窗口小时数与条数
+    complaint-window-hours: 24
+    complaint-cluster-size: 3
+    flush-min-minutes: 10
