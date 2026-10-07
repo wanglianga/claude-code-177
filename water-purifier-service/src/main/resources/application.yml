@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: water-purifier-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:waterdb}
+    username: ${DB_USER:water}
+    password: ${DB_PASSWORD:water123}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Shanghai
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: water-purifier-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.community.water.kafka.msg
+  jackson:
+    time-zone: Asia/Shanghai
+
+server:
+  port: ${SERVER_PORT:8080}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+
+# 业务规则配置
+water:
+  pricing:
+    # 居民取水单价（元/升）
+    unit-price-per-liter: 0.30
+  filter:
+    # 滤芯寿命预警阈值（%）
+    warn-percent: 15
+    # 滤芯耗尽阈值（%），达到即停售
+    exhausted-percent: 1
+    # 换芯后冲洗最短时长（分钟）
+    min-flush-minutes: 10
+  quality:
+    # TDS 上限（mg/L），超过判定水质异常
+    tds-max: 100
+    # 余氯合格区间（mg/L）
+    chlorine-min: 0.05
+    chlorine-max: 2.0
+    # TDS 对滤芯消耗的加速因子基准：TDS 每高于基准 50，消耗加速 25%
+    tds-stress-base: 50
+  complaint:
+    # 24 小时内同一设备投诉达到该数即聚集预警并暂停售水
+    cluster-threshold: 3
+    cluster-window-hours: 24
+    # 换芯后该天数内出现异味投诉视为“换芯后仍有异味”
+    post-replacement-odor-days: 7
+  workorder:
+    # 师傅到场时限（小时），超时未到场触发未到场预警并改派
+    arrive-deadline-hours: 4
+    # 超时巡检间隔（秒）
+    check-interval-seconds: 30
+  topics:
+    telemetry: water.device.telemetry
+    intake: water.device.intake
+    alert: water.alert
+    notification: water.notification
